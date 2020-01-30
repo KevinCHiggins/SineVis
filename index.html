@@ -1,0 +1,121 @@
+<!DOCTYPE HTML>
+<head>
+	<meta charset="utf-8">
+	<title>Sine Wave Visualisation: Fourth Attempt</title>
+	<link href="https://fonts.googleapis.com/css?family=Aleo:300&display=swap" rel="stylesheet">
+	<style>body {font-family: 'Aleo', serif;} h1 {text-align: center;}h3 {text-align: center;}}</style>
+</head>
+<body>
+	<h1>SVG Animated inJavaScript, Using Rotation Matrix</h1>
+	<h3>by Kevin Higgins, building on material from <a href="http://www.petercollingridge.co.uk/tutorials/svg/interactive/javascript/">Peter Collingridge</a></h3>
+	<section>
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500" id="inline-svg">
+			<circle cx="250" cy="250" r="5" stroke="black" stroke-width="1" id="dot" />
+			<line x1="1" y1="1" x2="200" y2="200" stroke="black" stroke-width="3" id="line-0" />
+			<line x1="1" y1="1" x2="200" y2="200" stroke="gray" stroke-width="3" id="line-1" />
+			<line x1="1" y1="1" x2="200" y2="200" stroke="blue" stroke-width="3" id="line-2" />
+		</svg>
+	</section>
+	<input type="range" min="1" max="20" value="1">
+</body>
+<script type="text/javascript">
+	var svgObject = document.getElementById('inline-svg');
+	var l1 = svgObject.getElementById('line-0');
+	var l2 = svgObject.getElementById('line-1');
+	var l3 = svgObject.getElementById('line-2');
+	var linesArray = [l1, l2, l3];
+	var scale = 100;
+	var xShift = []; // = scale * Math.cos(4 * Math.PI / 3);
+	var yShift = []; // scale * Math.sin(4 * Math.PI / 3);
+	// generate vectors for 3 even divisions of circle
+	var divisions = linesArray.length;
+	var rotation = Math.PI / divisions;
+
+	console.log(linesArray.length);
+	for (i = 0; i < divisions; i++) {
+		xShift[i] = scale * Math.cos(0 - (2 * i) / divisions);
+		yShift[i] = scale * Math.sin(0 - (2 * i) / divisions);
+	}
+	var dot = svgObject.getElementById('dot');
+	originX = parseInt(dot.getAttributeNS(null, 'cx'));
+	originY = parseInt(dot.getAttributeNS(null, 'cy'));
+	var timeDivisor = 1000;
+	function scaleUp (coord) {
+		return coord * scale;
+	}
+	function updateDotCoords () {
+		var currTime = (new Date() / timeDivisor);	// check if this is actually needed
+
+		pointX = originX + Math.sin(currTime) * scale;
+		pointY = originY + Math.cos(currTime) * scale;
+		
+		for (i = 0; i < divisions; i++) {
+			thisRotation = rotation * i;
+			var angle = thisRotation;
+			console.log('Angle of line ' + i + ' is ' + ((angle / Math.PI) * 180));
+			var orthShift = Math.cos(currTime + thisRotation);
+			//var rotX = (Math.cos(angle) - Math.sin(angle));
+			//var rotY = (Math.sin(angle) + Math.cos(angle));
+			sinA = Math.sin(angle);
+			cosA = Math.cos(angle);
+			var lineX1 = -1;
+			var lineY1 = orthShift;
+			var lineX2 = 1;
+			var lineY2 = orthShift;
+
+			//rotate using rotation matrix
+			
+			var rotLineX1 = (lineX1 * cosA) - (lineY1 * sinA);
+			var rotLineY1 = (lineX1 * sinA) + (lineY1 * cosA);
+			var rotLineX2 = (lineX2 * cosA) - (lineY2 * sinA);
+			var rotLineY2 = (lineX2 * sinA) + (lineY2 * cosA);
+			console.log(rotLineX1 + ' ' + rotLineY1 + ' ' + rotLineX2 + ' ' + rotLineY2);
+
+			rotLineX1 = scaleUp(rotLineX1);
+			rotLineY1 = scaleUp(rotLineY1);
+			rotLineX2 = scaleUp(rotLineX2);
+			rotLineY2 = scaleUp(rotLineY2);
+
+			currLine = linesArray[i];
+			currLine.setAttributeNS(null, 'x1', originX + rotLineX1);
+			currLine.setAttributeNS(null, 'y1', originY + rotLineY1);
+			currLine.setAttributeNS(null, 'x2', originX + rotLineX2);
+			currLine.setAttributeNS(null, 'y2', originY + rotLineY2);
+			/*
+			//twiceDivisions = divisions * 2;
+			var distanceToCentreOfLine = Math.sin(currTime + (Math.PI * 2 * (i / (divisions * 2))));
+			currLine = linesArray[i];
+			console.log('Dot x ' + pointX + ', dot y ' + pointY);
+			console.log('Line ' + i + ', Distance to line centre: ' + distanceToCentreOfLine);
+			console.log('X shift for this line: ' + xShift[i] + ', y shift: ' + yShift[i]);
+			console.log('x1 ' + (pointX + (distanceToCentreOfLine * xShift[i]) + xShift[i]));
+			console.log('y1 ' + (pointY + (distanceToCentreOfLine * yShift[i]) + yShift[i]));
+			console.log('x2 ' + (pointX + (distanceToCentreOfLine * xShift[i]) - xShift[i]));
+			console.log('y2 ' + (pointY + (distanceToCentreOfLine * yShift[i]) - yShift[i]));
+			currLine.setAttributeNS(null, 'x1', pointX + (distanceToCentreOfLine * xShift[i]) + xShift[i]);
+			currLine.setAttributeNS(null, 'y1', pointY + (distanceToCentreOfLine * yShift[i]) + yShift[i]);
+			currLine.setAttributeNS(null, 'x2', pointX + (distanceToCentreOfLine * xShift[i]) - xShift[i]);
+			currLine.setAttributeNS(null, 'y2', pointY + (distanceToCentreOfLine * yShift[i]) - yShift[i]);
+			*/
+			
+		}
+		/*
+		var distanceToCentreOfLine = Math.sin((5 * Math.PI / 6) - currTime);	// if my trigonometry worked
+		lineX1 = pointX + (distanceToCentreOfLine * xShift) + xShift;	
+		lineY1 = pointY + (distanceToCentreOfLine * yShift) + yShift;
+		lineX2 = pointX + (distanceToCentreOfLine * xShift) - xShift;
+		lineY2 = pointY + (distanceToCentreOfLine * yShift) - yShift;
+
+		line1.setAttributeNS(null, 'x1', lineX1);
+		line1.setAttributeNS(null, 'y1', lineY1);
+		line1.setAttributeNS(null, 'x2', lineX2);
+		line1.setAttributeNS(null, 'y2', lineY2);
+		*/
+
+		dot.setAttributeNS(null, 'cx', pointX);
+		dot.setAttributeNS(null, 'cy', pointY);
+		//console.log(lineX1 + ', ' + lineY1 + ', ' + lineX2 + ', ' + lineY2 + '.')
+	}
+
+	setInterval(updateDotCoords, 10);
+</script>

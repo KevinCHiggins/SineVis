@@ -1,0 +1,59 @@
+<!DOCTYPE HTML>
+<head>
+	<meta charset="utf-8">
+	<title>Sine Wave Visualisation: Second Attempt</title>
+	<link href="https://fonts.googleapis.com/css?family=Aleo:300&display=swap" rel="stylesheet">
+	<style>body {font-family: 'Aleo', serif;} h1 {text-align: center;}h3 {text-align: center;}input[type="range"] {width: 350px; margin: 50px 50px;}svg {margin:50px 50px;}</style>
+</head>
+<body>
+	<h1>SVG Elements Managed by JavaScript</h1>
+	<h3>by Kevin Higgins, building on material from <a href="http://www.petercollingridge.co.uk/tutorials/svg/interactive/javascript/">Peter Collingridge</a></h3>
+	<section>
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 350 350" width="350" height="350" id="inline-svg">
+			<!--<line x1="10" y1="175" x2="340" y2="175" stroke="black" stroke-width="1" id="animated-line"/>-->
+		</svg>
+	</section>
+	<section>
+		<input type="range" min="1" max="20" value="2" oninput="resetLines(this.value)" id="lines-amount-slider"/>
+	</section>
+</body>
+<script type="text/javascript">
+	var linesArray = [];
+	var svgObject = document.getElementById('inline-svg');
+	function resetLines(howMany) {
+		console.log('Resetting');
+		var newLinesArray = [];
+		var interval = 350 / howMany;	//hard coded to match height, but this is only standing in for arranging them around a circle so leave it
+		console.log(interval);
+		for (i = 0; i < howMany; i++) {
+			console.log('Adding line no. ' + (i + 1));
+			var newLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+			newLine.setAttributeNS(null, 'y1', (interval * i) + 1);
+			newLine.setAttributeNS(null, 'y2', (interval * i) + 1);
+			newLine.setAttributeNS(null, 'x1', 0);
+			newLine.setAttributeNS(null, 'x2', 350);
+			newLine.setAttributeNS(null, 'stroke', 'black');
+			newLine.setAttributeNS(null, 'id', 'line-' + i);	//hope this concatenates!
+			newLinesArray[i] = newLine;
+		}
+		linesArray = newLinesArray;
+		console.log(linesArray);
+		reinscribeLines();
+	}
+	function reinscribeLines () {
+		j = 1;	//counter to climb up through lines in SVG document
+		//remove any lines to be found
+		while (document.getElementById('line-' + j)) {	
+			var lineToRemove = document.getElementById('line-' + j);
+			console.log('Removing ' + lineToRemove);
+			svgObject.removeChild(lineToRemove);
+			j++;
+		}
+		for(i = 0; i < linesArray.length; i++) {
+			lineToInscribe = linesArray[i];
+			svgObject.appendChild(lineToInscribe);
+		}
+	}
+	resetLines(document.getElementById('lines-amount-slider').value);
+	
+</script>
